@@ -1,3 +1,7 @@
+//Edited by: Anastasija Pejkovic and Mina Savic
+
+
+  /*---------------------- USED LIBRARIES ----------------------*/
 #include "Arduino.h"
 #include "SoftwareSerial.h"
 #include "DFRobotDFPlayerMini.h"
@@ -11,6 +15,7 @@ void printDetail(uint8_t type, int value);
   /*---------------------- BUTTONS ----------------------*/
   const int buttonNext = 2;
   const int buttonPrevious = 3;
+  /*---------------------- VARIABLES ----------------------*/
   int buttonStateNext = 0; 
   int buttonStatePrevious = 0; 
   boolean isPlaying = false;
@@ -28,63 +33,46 @@ void setup()
   
   Serial.println();
   Serial.println(F("DFRobot DFPlayer Mini Demo"));
-  Serial.println(F("Initializing DFPlayer ... (May take 3 to 5 seconds)"));
+  Serial.println(F("Initializing DFPlayer ..."));
   
-  if (!myDFPlayer.begin(mySoftwareSerial)) {                //Use softwareSerial to communicate with mp3.
-    Serial.println(F("Unable to begin:"));
-    Serial.println(F("1.Please recheck the connection!"));
-    Serial.println(F("2.Please insert the SD card!"));
+  if (!myDFPlayer.begin(mySoftwareSerial))    //Use softwareSerial to communicate with mp3
+  {
+    Serial.println(F("Unable to begin. Please recheck your connection or if the SD card is inserted!"));
     while(true);
   }
-  Serial.println(F("DFPlayer Mini online."));
+  Serial.println(F("DFPlayer Mini activated."));
   
-  myDFPlayer.volume(15);  //Set volume value. From 0 to 30
+  myDFPlayer.volume(15);  //For volume setting. Choose between 0 and 30
   
   myDFPlayer.play(1);  //Play the first mp3
   isPlaying = true;
 }
 
 void loop()
-{
-  static unsigned long timer = millis();
-  /*
-  if (millis() - timer > 3000) {
-    timer = millis();
-    myDFPlayer.next();  //Play next mp3 every 3 second.
-  }
-  */
-
-  /*---------------------- CHANGED ----------------------*/
-  //myDFPlayer.outputDevice(DFPLAYER_DEVICE_SD);  //Set device to SD
-
-  /*------------------- MP3 PLAY NEXT -------------------*/
+{ 
+  /*------------------- MP3 PLAY - BUTTON NEXT -------------------*/
  if (digitalRead(buttonNext) == ACTIVATED)
   {
     if(isPlaying)
     {
       delay(500);
       myDFPlayer.next();
-      Serial.println(F("next!"));
+      Serial.println(F("Next song is playing!"));
       delay(500);
     }
   }
   
-  /*----------------- MP3 PLAY PREVIOUS -----------------*/
+  /*----------------- MP3 PLAY - BUTTON PREVIOUS -----------------*/
  if (digitalRead(buttonPrevious) == ACTIVATED)
   {
     if(isPlaying)
     {
       delay(500);
       myDFPlayer.previous();
-      Serial.println(F("previous"));
+      Serial.println(F("Previous song is playing!"));
       delay(500);
     }
   }
-
-  /*-------------------- MP3 PAUSE --------------------*/
-
-
-  
   /*----------------------- PRINT -----------------------*/
   
   if (myDFPlayer.available()) {
@@ -92,6 +80,8 @@ void loop()
   }
 }
 
+
+  /*----------------------- POSSIBLE ERRORS -----------------------*/
 void printDetail(uint8_t type, int value){
   switch (type) {
     case TimeOut:
