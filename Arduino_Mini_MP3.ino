@@ -4,66 +4,92 @@
 
 # define ACTIVATED LOW
 
-SoftwareSerial mySoftwareSerial(10, 11); // RX, TX
+SoftwareSerial mySoftwareSerial(10, 11); // TX, RX
 DFRobotDFPlayerMini myDFPlayer;
 void printDetail(uint8_t type, int value);
 
   /*---------------------- BUTTONS ----------------------*/
   const int buttonNext = 2;
   const int buttonPrevious = 3;
-  const int buttonStateNext = 0; 
-  const int buttonStatePrevious = 0; 
+  int buttonStateNext = 0; 
+  int buttonStatePrevious = 0; 
   boolean isPlaying = false;
   /*-----------------------------------------------------*/
 
 void setup()
 {
   mySoftwareSerial.begin(9600);
-  Serial.begin(115200);
-  pinMode(buttonNext, INPUT);
-  pinMode(buttonPrevious, INPUT);
+  Serial.begin(9600);
 
+  /*--------------- INITIALIZE PUSHBUTTONS ---------------*/
+  pinMode(buttonNext, INPUT_PULLUP);
+  pinMode(buttonPrevious, INPUT_PULLUP);
+  /*------------------------------------------------------*/
   
   Serial.println();
   Serial.println(F("DFRobot DFPlayer Mini Demo"));
-  Serial.println(F("Inicijalizacija DFPlayer-a ..."));
+  Serial.println(F("Initializing DFPlayer ... (May take 3 to 5 seconds)"));
   
-  if (!myDFPlayer.begin(mySoftwareSerial)) {        //Koristi se softwareSerial za komunikaciju sa mp3.
-    Serial.println(F("Nemoguce pokretanje! Proverite konekciju i SD karticu!"));
+  if (!myDFPlayer.begin(mySoftwareSerial)) {                //Use softwareSerial to communicate with mp3.
+    Serial.println(F("Unable to begin:"));
+    Serial.println(F("1.Please recheck the connection!"));
+    Serial.println(F("2.Please insert the SD card!"));
     while(true);
   }
   Serial.println(F("DFPlayer Mini online."));
   
-  myDFPlayer.volume(15);  //Setovanje jacine zvuka, vrednosti od 0 do 30
-  myDFPlayer.play(2);  //Pusti prvu pesmu
+  myDFPlayer.volume(15);  //Set volume value. From 0 to 30
+  
+  myDFPlayer.play(1);  //Play the first mp3
   isPlaying = true;
 }
 
 void loop()
 {
-  /*------------------- MP3 PLAY NAREDNA -------------------*/
- if (digitalRead(buttonNext) == ACTIVATED){
-    if(isPlaying){
+  static unsigned long timer = millis();
+  /*
+  if (millis() - timer > 3000) {
+    timer = millis();
+    myDFPlayer.next();  //Play next mp3 every 3 second.
+  }
+  */
+
+  /*---------------------- CHANGED ----------------------*/
+  //myDFPlayer.outputDevice(DFPLAYER_DEVICE_SD);  //Set device to SD
+
+  /*------------------- MP3 PLAY NEXT -------------------*/
+ if (digitalRead(buttonNext) == ACTIVATED)
+  {
+    if(isPlaying)
+    {
       delay(500);
       myDFPlayer.next();
-      Serial.println(F("Pustili ste narednu pesmu!"));
-      
+      Serial.println(F("next!"));
+      delay(500);
     }
   }
   
-  /*----------------- MP3 PLAY PRETHODNA -----------------*/
- if (digitalRead(buttonPrevious) == ACTIVATED){
-    if(isPlaying){
+  /*----------------- MP3 PLAY PREVIOUS -----------------*/
+ if (digitalRead(buttonPrevious) == ACTIVATED)
+  {
+    if(isPlaying)
+    {
       delay(500);
       myDFPlayer.previous();
-      Serial.println(F("Pustili ste prethodnu pesmu"));
-      
+      Serial.println(F("previous"));
+      delay(500);
     }
   }
 
- if (myDFPlayer.available()) {
-   printDetail(myDFPlayer.readType(), myDFPlayer.read()); 
- }
+  /*-------------------- MP3 PAUSE --------------------*/
+
+
+  
+  /*----------------------- PRINT -----------------------*/
+  
+  if (myDFPlayer.available()) {
+    printDetail(myDFPlayer.readType(), myDFPlayer.read()); 
+  }
 }
 
 void printDetail(uint8_t type, int value){
@@ -119,5 +145,4 @@ void printDetail(uint8_t type, int value){
     default:
       break;
   }
-
 }
